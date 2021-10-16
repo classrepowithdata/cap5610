@@ -49,6 +49,14 @@ def compute_sse(clusters, centroids, distance):
         sse += np.sum(distance(items, centroids[index]))
     
     return sse
+    
+def points_are_equal(pt1, pt2):
+    if pt2.shape != pt1.shape: return False
+    
+    for a, b in zip(pt1, pt2):
+        if a != b: return False
+        
+    return True
  
 def parse_centroid(center):
     return [float(f) for f in center.split(",")]
@@ -145,22 +153,14 @@ def main(args):
         for point in points:
             # locate the index for that point
             for index, data_point in enumerate(data):
-                if np.array_equal(data_point, point):
+                if points_are_equal(data_point, point):
                     break
             # print(index)
             truth = ground_truth[index][0]
             group_data[predicted][truth] += 1
 
-    # print(group_data)
-    maximums = np.argmax(group_data, axis=1)
-    # print(maximums)
-    
+    maximums = np.argmax(group_data, axis=1)    
     hits = np.sum(group_data[maximums])
-    
-    # hits = 0
-    # for n, row in group_data:
-    #    hits += row[n]
-    
     print(f"[I] accuracy {hits}/{training_samples} ({100* hits/training_samples}%)")
 
     return 0
