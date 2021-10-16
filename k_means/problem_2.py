@@ -137,10 +137,29 @@ def main(args):
     print(f"SSE: {new_sse}")
 
     ground_truth = pd.read_csv(args.data_labels).values
-    hits = 0
-    for point_truth, point_predict in zip(ground_truth, classifications):
-        if point_truth[0] == point_predict:
-            hits += 1
+    group_data = np.zeros((args.total_centroids, args.total_centroids))
+    
+    # majority votes in O(n^2) because we take a shot in complexity regardless of what we do
+    # and np.where() refuses to work for searching for the points...
+    for predicted, points in tmp_dict.items():
+        for point in points:
+            # locate the index for that point
+            for index, data_point in enumerate(data):
+                if np.array_equal(data_point, point):
+                    break
+            # print(index)
+            truth = ground_truth[index][0]
+            group_data[predicted][truth] += 1
+
+    # print(group_data)
+    maximums = np.argmax(group_data, axis=1)
+    # print(maximums)
+    
+    hits = np.sum(group_data[maximums])
+    
+    # hits = 0
+    # for n, row in group_data:
+    #    hits += row[n]
     
     print(f"[I] accuracy {hits}/{training_samples} ({100* hits/training_samples}%)")
 
